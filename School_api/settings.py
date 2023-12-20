@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
 from pathlib import Path
+
+import redis
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -40,9 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',
 
     'user',
-    'school',
 ]
 
 MIDDLEWARE = [
@@ -131,4 +133,20 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# AUTH_USER_MODEL = "user.User"
+AUTH_USER_MODEL = "user.User"
+
+# Configure DRF authentication settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ]
+}
+
+
+# redis jwt token
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = os.getenv('REDIS_PORT')
+REDIS_REFRESH_TIME_CHECK_SYSTEM = 365 * (24 * (60 * 60))  # 1 year
+REDIS_REFRESH_TIME = 24 * (60 * 60)
+REDIS_JWT_TOKEN = redis.StrictRedis(host=REDIS_HOST,
+                                    port=REDIS_PORT, db=0)

@@ -4,7 +4,6 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group, Permission
 
 from .validators import check_phone, isnumeric
-from school.models import School
 
 
 class MyUserManager(UserManager):
@@ -29,12 +28,7 @@ class User(AbstractUser):
                                 validators=[check_phone])
     bio = models.TextField(null=True,
                            blank=True)
-    school_name = models.ForeignKey(
-                                School,
-                                on_delete=models.CASCADE,
-                                null=True,
-                                blank=True,
-                                related_name='users')
+
     groups = models.ManyToManyField(
                                     Group,
                                     related_name='users',
@@ -48,7 +42,7 @@ class User(AbstractUser):
 
     objects = MyUserManager()
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['first_name', 'phone_number', 'password']
+    REQUIRED_FIELDS = ['password']
 
     def save(self, *args, **kwargs):
         self.password = make_password(self.password)
