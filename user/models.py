@@ -4,7 +4,6 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group, Permission
 
 from .validators import check_phone, isnumeric
-from school.models import School
 
 
 class MyUserManager(UserManager):
@@ -17,38 +16,15 @@ class MyUserManager(UserManager):
 
 
 class User(AbstractUser):
-    national_code = models.CharField(
-                                max_length=11,
-                                unique=True,
-                                db_index=True,
-                                validators=[isnumeric])
-    phone_number = models.CharField(
-                                max_length=11,
-                                unique=True,
-                                db_index=True,
-                                validators=[check_phone])
-    bio = models.TextField(null=True,
-                           blank=True)
-    school_name = models.ForeignKey(
-                                School,
-                                on_delete=models.CASCADE,
-                                null=True,
-                                blank=True,
-                                related_name='users')
-    groups = models.ManyToManyField(
-                                    Group,
-                                    related_name='users',
-                                    db_index=True,
-                                    blank=True)
-    user_permissions = models.ManyToManyField(
-                                              Permission,
-                                              related_name='users',
-                                              db_index=True,
-                                              blank=True)
+    national_code = models.CharField(max_length=11, unique=True, db_index=True, validators=[isnumeric])
+    phone_number = models.CharField(max_length=11, unique=True, db_index=True, validators=[check_phone])
+    bio = models.TextField(null=True, blank=True)
+    groups = models.ManyToManyField(Group, related_name='users', db_index=True, blank=True)
+    user_permissions = models.ManyToManyField(Permission, related_name='users', db_index=True, blank=True)
 
     objects = MyUserManager()
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['first_name', 'phone_number', 'password']
+    USERNAME_FIELD = 'phone_number'
+    REQUIRED_FIELDS = ['password']
 
     def save(self, *args, **kwargs):
         self.password = make_password(self.password)
