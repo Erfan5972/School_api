@@ -16,32 +16,14 @@ class MyUserManager(UserManager):
 
 
 class User(AbstractUser):
-    national_code = models.CharField(
-                                max_length=11,
-                                unique=True,
-                                db_index=True,
-                                validators=[isnumeric])
-    phone_number = models.CharField(
-                                max_length=11,
-                                unique=True,
-                                db_index=True,
-                                validators=[check_phone])
-    bio = models.TextField(null=True,
-                           blank=True)
-
-    groups = models.ManyToManyField(
-                                    Group,
-                                    related_name='users',
-                                    db_index=True,
-                                    blank=True)
-    user_permissions = models.ManyToManyField(
-                                              Permission,
-                                              related_name='users',
-                                              db_index=True,
-                                              blank=True)
+    national_code = models.CharField(max_length=11, unique=True, db_index=True, validators=[isnumeric])
+    phone_number = models.CharField(max_length=11, unique=True, db_index=True, validators=[check_phone])
+    bio = models.TextField(null=True, blank=True)
+    groups = models.ManyToManyField(Group, related_name='users', db_index=True, blank=True)
+    user_permissions = models.ManyToManyField(Permission, related_name='users', db_index=True, blank=True)
 
     objects = MyUserManager()
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ['password']
 
     def save(self, *args, **kwargs):

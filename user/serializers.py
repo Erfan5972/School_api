@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from . import models
 from .utils import get_tokens
@@ -62,7 +63,74 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 
-class UserLoginSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.User
-        fields = ['username', 'password']
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=100, required=True, write_only=True)
+    password = serializers.CharField(max_length=100, required=True, write_only=True)
+    token = serializers.SerializerMethodField(read_only=True)
+    user = serializers.SerializerMethodField(read_only=True)
+
+    def validate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+        try:
+            user = models.User.objects.get(username=username)
+            if user.check_password(password) and user.is_active:
+                return data
+            raise ValidationError('username or password is wrong')
+        except:
+            raise ValidationError('username or password is wrong')
+
+    def get_user(self, obj):
+        try:
+            user = models.User.objects.get(username=obj['username'])
+            user = UserSerializer(instance=user)
+            return user.data
+        except:
+            raise ValidationError('username or password is wrong')
+
+    def get_token(self, obj):
+        user = models.User.objects.get(username=obj['username'])
+        token = get_tokens(user)
+        refresh = token['refresh']
+        access = token['access']
+        settings.REDIS_JWT_TOKEN.set(name=refresh, value=refresh, ex=settings.REDIS_REFRESH_TIME)
+        return {
+            "refresh": refresh,
+            "access": access
+        }
+
+
+
+class UserLogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField(max_length=1000, required=True)
+
+    def validate_refresh(self, data):
+        if settings.REDIS_JWT_TOKEN.get(name=data):
+            settings.REDIS_JWT_TOKEN.delete(data)
+            return data
+        else:
+            raise ValidationError('token is invalid or expired')
+
+
+class RefreshTokenSerializer(serializers.Serializer):
+    refresh = serializers.CharField(max_length=1000, required=True, write_only=True)
+    token = serializers.SerializerMethodField(read_only=True)
+
+    def validate_refresh(self, data):
+        if settings.REDIS_JWT_TOKEN.get(name=data):
+            return data
+        else:
+            raise ValidationError('Token is invalid or expired')
+
+
+    def get_token(self, obj):
+        refresh = settings.REDIS_JWT_TOKEN.get(name=obj['refresh'])
+        token_refresh = RefreshToken(refresh)
+        user = models.User.objects.get(id=token_refresh['user_id'])
+        settings.REDIS_JWT_TOKEN.delete(refresh)
+        token = get_tokens(user)
+        access = token['access']
+        refresh = token['refresh']
+        settings.REDIS_JWT_TOKEN.set(name=refresh, value=refresh, ex=settings.REDIS_REFRESH_TIME)
+        data = {'access': access, 'refresh': refresh}
+        return data

@@ -1,7 +1,9 @@
 from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework import status
 
 from .models import User
-from .serializers import UserSerializer, UserLoginSerializer
+from .serializers import UserSerializer, UserLoginSerializer, UserLogoutSerializer, RefreshTokenSerializer
 
 
 class UserRegister(generics.CreateAPIView):
@@ -9,6 +11,33 @@ class UserRegister(generics.CreateAPIView):
     queryset = User.objects.all()
 
 
-class UserLogin(generics.RetrieveAPIView):
-    serializer_class = UserLoginSerializer
+class UserLogin(generics.GenericAPIView):
     queryset = User.objects.all()
+    serializer_class = UserLoginSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            return Response(serializer.data, status.HTTP_302_FOUND)
+        return Response(serializer.data, status.HTTP_404_NOT_FOUND)
+
+
+class UserLogout(generics.GenericAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserLogoutSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            return Response({"data": serializer.data, "msg": "you logged out successfully"}, status.HTTP_200_OK)
+        return Response(serializer.data, status.HTTP_400_BAD_REQUEST)
+
+
+class RefreshTokenView(generics.GenericAPIView):
+    queryset = User.objects.all()
+    serializer_class = RefreshTokenSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status.HTTP_200_OK)
