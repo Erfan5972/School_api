@@ -23,7 +23,7 @@ class User(AbstractUser):
     user_permissions = models.ManyToManyField(Permission, related_name='users', db_index=True, blank=True)
 
     objects = MyUserManager()
-    USERNAME_FIELD = 'phone_number'
+    USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['password']
 
     def save(self, *args, **kwargs):
@@ -32,3 +32,7 @@ class User(AbstractUser):
 
     def __str__(self):
         return f'{self.username}//{self.id}'
+
+    class Meta:
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
