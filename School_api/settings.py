@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
 
-    'user',
+    'user.apps.UserConfig',
+    'course.apps.CourseConfig',
 ]
 
 MIDDLEWARE = [
@@ -142,7 +143,6 @@ REST_FRAMEWORK = {
     ]
 }
 
-
 # redis jwt token
 REDIS_HOST = os.getenv('REDIS_HOST')
 REDIS_PORT = os.getenv('REDIS_PORT')
@@ -150,3 +150,6 @@ REDIS_REFRESH_TIME_CHECK_SYSTEM = 365 * (24 * (60 * 60))  # 1 year
 REDIS_REFRESH_TIME = 24 * (60 * 60)
 REDIS_JWT_TOKEN = redis.StrictRedis(host=REDIS_HOST,
                                     port=REDIS_PORT, db=0)
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
