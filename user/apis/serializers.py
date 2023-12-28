@@ -4,8 +4,8 @@ from django.conf import settings
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from . import models
-from .utils import get_tokens
+from user import models
+from user.utils import get_tokens
 
 
 class UserSerializer(serializers.ModelSerializer):

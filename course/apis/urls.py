@@ -1,11 +1,11 @@
 from django.urls import path
 
-from . import views
+from course.apis import views
 
 from django.conf import settings
 from django.conf.urls.static import static
 
-
+app_name = 'course'
 urlpatterns = [
     path('add/', views.CourseCreateView.as_view(), name='add-course'),
     path('add-file/', views.CourseFileCreateView.as_view(), name='add-course-file'),

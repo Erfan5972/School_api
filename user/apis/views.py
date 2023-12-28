@@ -3,8 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import User
-from .serializers import UserSerializer, UserLoginSerializer, UserLogoutSerializer, RefreshTokenSerializer
+from user.models import User
+from user.apis.serializers import UserSerializer, UserLoginSerializer, UserLogoutSerializer, RefreshTokenSerializer
 
 
 class UserRegister(generics.CreateAPIView):
