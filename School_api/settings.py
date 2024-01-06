@@ -153,3 +153,7 @@ REDIS_JWT_TOKEN = redis.StrictRedis(host=REDIS_HOST,
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+# celery
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
