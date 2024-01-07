@@ -15,15 +15,17 @@ class CourseCreateView(generics.CreateAPIView):
 class CourseFileCreateView(generics.GenericAPIView):
     queryset = models.CourseFile.objects.all()
     serializer_class = serializers.CourseFileSerializer
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+
 
     def post(self, request):
-        file = request.data['file']
+        file = request.FILES
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         process_uploaded_file.delay(file)
 
         return Response({'message': 'File uploaded successfully'})
+
 
 
 class CourseListView(generics.ListAPIView):
