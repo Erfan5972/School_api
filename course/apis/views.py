@@ -1,8 +1,9 @@
 from course import models
 from course.apis import serializers
-
+from .tasks import process_uploaded_file
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 
 class CourseCreateView(generics.CreateAPIView):
@@ -11,10 +12,20 @@ class CourseCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
 
-class CourseFileCreateView(generics.CreateAPIView):
+class CourseFileCreateView(generics.GenericAPIView):
     queryset = models.CourseFile.objects.all()
     serializer_class = serializers.CourseFileSerializer
     permission_classes = [IsAuthenticated]
+
+
+    def post(self, request):
+        file = request.FILES
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        process_uploaded_file.delay(file)
+
+        return Response({'message': 'File uploaded successfully'})
+
 
 
 class CourseListView(generics.ListAPIView):

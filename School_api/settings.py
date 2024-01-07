@@ -137,11 +137,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "user.User"
 
 # Configure DRF authentication settings
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ]
-}
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework_simplejwt.authentication.JWTAuthentication',
+#     ]
+# }
 
 # redis jwt token
 REDIS_HOST = os.getenv('REDIS_HOST')
@@ -153,3 +153,10 @@ REDIS_JWT_TOKEN = redis.StrictRedis(host=REDIS_HOST,
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+# Add the following line to create the directory if it doesn't exist
+os.makedirs(os.path.join(MEDIA_ROOT, 'course/file'), exist_ok=True)
+
+# celery
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
