@@ -1,95 +1,115 @@
-version: '3.7'
+#version: '3.7'
+#
+#services:
+##Redis-----------------------------------------------------------------------------------------
+#    School-api-redis:
+#        image: redis:latest
+#        container_name: school_api_redis
+#        hostname: school_api_redis
+#        env_file:
+#            - .env
+#        ports:
+#            - "6379:6379"
+#        volumes:
+#            - school_api_redis_data:/data
+#        networks:
+#            - school_api
+#        command: ["sh", "-c", "rm -f /data/dump.rdb && redis-server --save '' --appendonly no "]
+#        restart: on-failure
+#
+#
+##Postgres-----------------------------------------------------------------------------------------
+#    School-api-postgres:
+#        image: postgis/postgis:latest
+#        container_name: school_api_postgresql
+#        hostname: school_api_postgresql
+#        environment:
+#            - POSTGRES_DB=school_api_db
+#            - POSTGRES_USER=school_api_user
+#            - POSTGRES_PASSWORD=school_api
+#        ports:
+#            - "5432:5432"
+#        volumes:
+#            - school_api_postgresql_data:/var/lib/postgresql/data
+#        networks:
+#            - school_api
+#        restart: on-failure
+#
+##API-----------------------------------------------------------------------------------------
+#    School-api:
+#        image: school_api:latest
+#        container_name: school_api
+#        hostname: school_api
+#        depends_on:
+#            - School-api-postgres
+#            - School-api-redis
+#        ports:
+#            - "8088:8088"
+#        # command: ["ping", "8.8.8.8"]
+#        env_file:
+#            - .env
+#        volumes:
+#            - school_api_media_data:/app/media
+#            - school_api_static_data:/app/static
+#        networks:
+#            - school_api
+#        restart: on-failure
+#
+#
+#
+#volumes:
+#    school_api_media_data:
+#        external: true
+#    school_api_static_data:
+#        external: true
+#    school_api_postgresql_data:
+#        external: true
+#    school_api_redis_data:
+#        external: true
+#
+#
+#networks:
+#    school_api:
+#        external: true
+#        name: school_api_net
+
+version: '3'
 
 services:
-#Redis-----------------------------------------------------------------------------------------
-    School-api-redis:
-        image: redis:latest
-        container_name: school_api_redis
-        hostname: school_api_redis
-        env_file:
-            - .env
-        ports:
-            - "6379:6379"
-        volumes:
-            - school_api_redis_data:/data
-        networks:
-            - school_api
-        command: ["sh", "-c", "rm -f /data/dump.rdb && redis-server --save '' --appendonly no "]
-        restart: on-failure
+  db:
+    image: postgis/postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: db
+      DB_PORT: ${DB_PORT}
 
-# #Nginx-----------------------------------------------------------------------------------------
-#     its-nginx:
-#         image: harbor.sahimco.ir/public/nginx:latest
-#         container_name: its_nginx
-#         hostname: its_nginx
-#         ports:
-#             - 80:80
-#             - 443:443
-#         volumes:
-#             - ./docker/compose/nginx_config/nginx.conf:/etc/nginx/nginx.conf
-#             - ./docker/compose/nginx_config/conf.d/:/etc/nginx/conf.d
-#             - its_media_data:/django_media:ro
-#             - its_statics_data:/django_statics:ro
-#         networks:
-#             - its
-#         depends_on:
-#             - its-api
-#             - its-socket
-#         restart: on-failure
-
-
-#Postgres-----------------------------------------------------------------------------------------
-    School-api-postgres:
-        image: postgis/postgis:latest
-        container_name: school_api_postgresql
-        hostname: school_api_postgresql
-        environment:
-            - POSTGRES_DB=school_api_db
-            - POSTGRES_USER=school_api_user
-            - POSTGRES_PASSWORD=school_api
-        ports:
-            - "5432:5432"
-        volumes:
-            - school_api_postgresql_data:/var/lib/postgresql/data
-        networks:
-            - school_api
-        restart: on-failure
-
-#API-----------------------------------------------------------------------------------------
-    School-api:
-        image: school_api:latest
-        container_name: school_api
-        hostname: school_api
-        depends_on:
-            - School-api-postgres
-            - School-api-redis
-        ports:
-            - "8088:8088"
-        # command: ["ping", "8.8.8.8"]
-        env_file:
-            - .env
-        volumes:
-            - school_api_media_data:/app/media
-            - school_api_static_data:/app/static
-        networks:
-            - school_api
-        restart: on-failure
-
-
+  redis:
+    image: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
 
 volumes:
-    school_api_media_data:
-        external: true
-    school_api_static_data:
-        external: true
-    school_api_postgresql_data:
-        external: true
-    school_api_redis_data:
-        external: true
-
-
-networks:
-    school_api:
-        external: true
-        name: school_api_net
+  db_data:

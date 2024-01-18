@@ -1,23 +1,21 @@
-FROM python:latest
+# Use a base image
+FROM python:3.9-slim
 
-RUN apt -y update && apt -y install gdal-bin  &&
-
-
-ARG port=8088
-ENV GUNICORN_WORKER_NO=10
-ENV GUNICORN_LISTENINIG_PORT=${port}
-ENV GUNICORN_TIMEOUT=1900
-
-
+# Set the working directory
 WORKDIR /app
-RUN mkdir media static
-VOLUME [ "/app/media" ]
-VOLUME [ "/app/static" ]
-RUN pip3 install --upgrade pip
-COPY requirments.txt .
-RUN pip3 install --no-cache-dir -r requirments.txt
+
+# Copy the requirements.txt file and install dependencies
+COPY requirement.txt .
+RUN pip install --no-cache-dir -r requirement.txt
+
+# Copy the rest of the project files to the working directory
 COPY . .
 
-RUN chmod +x start.sh
-EXPOSE ${port}
-CMD [ "./start.sh" ]
+# Set environment variables if needed
+ENV ENV_VAR_NAME=value
+
+# Expose any necessary ports
+EXPOSE 8000
+
+# Define the command to run your application
+CMD ["python", "app.py"]

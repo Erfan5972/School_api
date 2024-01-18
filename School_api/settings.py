@@ -135,22 +135,20 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "user.User"
-
+#
 # Configure DRF authentication settings
-# REST_FRAMEWORK = {
-#     'DEFAULT_AUTHENTICATION_CLASSES': [
-#         'rest_framework_simplejwt.authentication.JWTAuthentication',
-#     ]
-# }
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ]
+}
 
 # redis jwt token
-REDIS_HOST = os.getenv('REDIS_HOST')
-REDIS_PORT = os.getenv('REDIS_PORT')
+REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+REDIS_PORT = os.getenv('REDIS_PORT', '6379')
 REDIS_REFRESH_TIME_CHECK_SYSTEM = 365 * (24 * (60 * 60))  # 1 year
 REDIS_REFRESH_TIME = 24 * (60 * 60)
-REDIS_JWT_TOKEN = redis.StrictRedis(host=REDIS_HOST,
-                                    port=REDIS_PORT, db=0)
-
+REDIS_JWT_TOKEN = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=0)
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
